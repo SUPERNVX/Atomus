@@ -1,0 +1,5 @@
+{
+  "name": "Visualizador 3D do Modelo Atômico de Bohr",
+  "description": "Uma aplicação web interativa para visualizar o modelo atômico de Bohr em 3D. Permite controlar o número de prótons, nêutrons e elétrons em cada camada, com animações fluidas e uma interface limpa.",
+  "requestFramePermissions": []
+}
