@@ -67,19 +67,23 @@ export const SchrodingerModel: React.FC<SchrodingerModelProps> = ({ protons, neu
     const [trajectory, setTrajectory] = useState<[THREE.Vector3, THREE.Vector3] | null>(null);
 
     useEffect(() => {
+        const nucleusRadius = 2.0; // Safe radius for the nucleus area
+
         if (mode === 'position') {
-            const pos = new THREE.Vector3().randomDirection().multiplyScalar(Math.random() * CLOUD_RADIUS);
+            let pos;
+            do {
+                pos = new THREE.Vector3().randomDirection().multiplyScalar(Math.random() * CLOUD_RADIUS);
+            } while (pos.length() < nucleusRadius);
+
             setPosition(pos);
             setTrajectory(null);
         } else if (mode === 'trajectory') {
-            const nucleusRadius = 2.0; // Safe radius for the nucleus area
             let start: THREE.Vector3, end: THREE.Vector3, intersects = true;
 
             while(intersects) {
                 start = new THREE.Vector3().randomDirection().multiplyScalar(Math.random() * CLOUD_RADIUS);
                 end = new THREE.Vector3().randomDirection().multiplyScalar(Math.random() * CLOUD_RADIUS);
 
-                // Check for intersection
                 const line = new THREE.Line3(start, end);
                 const closestPoint = new THREE.Vector3();
                 line.closestPointToPoint(new THREE.Vector3(0,0,0), true, closestPoint);

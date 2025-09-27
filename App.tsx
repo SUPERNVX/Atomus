@@ -22,6 +22,10 @@ const SchrodingerModel = lazy(() => import('./components/SchrodingerModel').then
 
 type ModelId = 'dalton' | 'thomson' | 'rutherford' | 'sommerfeld' | 'bohr' | 'schrodinger';
 
+import { useLocation, useNavigate } from 'react-router-dom';
+
+const VALID_MODELS: ModelId[] = ['dalton', 'thomson', 'rutherford', 'sommerfeld', 'bohr', 'schrodinger'];
+
 const App: React.FC = () => {
   const [atomState, setAtomState] = useState<AtomState>({
     protons: 6,
@@ -29,12 +33,29 @@ const App: React.FC = () => {
     electrons: [2, 4, 0, 0, 0, 0, 0] as [number, number, number, number, number, number, number],
   });
 
-  const [currentModel, setCurrentModel] = useState<ModelId>('bohr');
+  const [currentModel, setCurrentModel] = useState<ModelId>('dalton');
   const [thomsonChargeCount, setThomsonChargeCount] = useState(8);
   const [canvasKey, setCanvasKey] = useState(0);
   const [contextLost, setContextLost] = useState(false);
-  const [orbitThickness, setOrbitThickness] = useState<number>(2); // New state for orbit thickness
+  const [orbitThickness, setOrbitThickness] = useState<number>(2);
   const rendererRef = useRef<any>(null);
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const modelId = location.pathname.slice(1).toLowerCase() as ModelId;
+    if (VALID_MODELS.includes(modelId)) {
+      setCurrentModel(modelId);
+    } else {
+      // Redirect to a default model if the path is invalid
+      navigate('/dalton', { replace: true });
+    }
+  }, [location, navigate]);
+
+  const handleModelChange = (modelId: ModelId) => {
+    navigate(`/${modelId}`);
+  };
 
   const handleThomsonChargeChange = (value: number) => {
     setThomsonChargeCount(value);
@@ -143,8 +164,7 @@ const App: React.FC = () => {
             {(currentModel === 'bohr' || currentModel === 'sommerfeld' || currentModel === 'rutherford') && <Legend onUpdateElectrons={handleUpdateElectrons} />}
             {MODEL_DATA[currentModel] && <ContextualInfo data={MODEL_DATA[currentModel]} />}
          </div>
-         
-         <Timeline currentModel={currentModel} onModelChange={setCurrentModel} />
+         <Timeline currentModel={currentModel} onModelChange={handleModelChange} />
 
          <div className="absolute top-4 right-4">
            {(currentModel === 'bohr' || currentModel === 'sommerfeld' || currentModel === 'rutherford') && (
