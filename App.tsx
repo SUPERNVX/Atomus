@@ -158,7 +158,7 @@ const App: React.FC = () => {
   const [schrodingerActionId, setSchrodingerActionId] = useState(0);
 
   return (
-    <main className="relative h-screen w-screen bg-blue-950 text-gray-200 flex flex-col overflow-hidden">
+    <main style={{backgroundColor: '#111828'}} className="relative h-screen w-screen text-gray-200 flex flex-col overflow-hidden">
       <header className="absolute top-0 left-0 w-full p-4 z-10 flex justify-center items-start">
          <div className="absolute top-20 left-4 flex flex-col space-y-4">
             {(currentModel === 'bohr' || currentModel === 'sommerfeld' || currentModel === 'rutherford') && <Legend onUpdateElectrons={handleUpdateElectrons} />}
