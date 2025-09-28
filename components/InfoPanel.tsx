@@ -1,5 +1,6 @@
 import React from 'react';
 import { ELEMENTS } from '../data/elements';
+import { useTranslation } from 'react-i18next';
 
 interface InfoPanelProps {
   protons: number;
@@ -15,16 +16,17 @@ const InfoItem: React.FC<{ label: string; value: string | number }> = ({ label, 
 );
 
 export const InfoPanel: React.FC<InfoPanelProps> = ({ protons, neutrons, totalElectrons }) => {
+  const { t } = useTranslation();
   const element = ELEMENTS.find(el => el.atomicNumber === protons);
   const symbol = element ? element.symbol : '?';
-  const name = element ? element.name : 'Elemento Desconhecido';
+  const name = element ? t(element.name) : t('unknown_element');
   const atomicNumber = protons;
   const atomicMass = protons + neutrons;
   
   const charge = protons - totalElectrons;
   let chargeText: string;
   if (charge === 0) {
-    chargeText = 'Neutro';
+    chargeText = t('neutral');
   } else if (charge > 0) {
     chargeText = `+${charge}`;
   } else {
@@ -37,9 +39,9 @@ export const InfoPanel: React.FC<InfoPanelProps> = ({ protons, neutrons, totalEl
         <h2 className="text-5xl font-bold tracking-tighter" style={{ lineHeight: 1 }}>{symbol}</h2>
         <p className="text-sm text-gray-300 mt-1">{name}</p>
       </div>
-      <InfoItem label="Nº Atômico" value={atomicNumber} />
-      <InfoItem label="Massa Atômica" value={atomicMass} />
-      <InfoItem label="Carga" value={chargeText} />
+      <InfoItem label={t('atomic_number')} value={atomicNumber} />
+      <InfoItem label={t('atomic_mass')} value={atomicMass} />
+      <InfoItem label={t('charge')} value={chargeText} />
     </div>
   );
 };

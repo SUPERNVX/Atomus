@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AtomState, Shell } from '../types';
+import { useTranslation } from 'react-i18next';
 
 interface ControlsProps {
   atomState: AtomState;
@@ -123,6 +124,7 @@ export const Controls: React.FC<ControlsProps> = ({
     onElectronChange,
     showShellControls
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="space-y-4 p-2 rounded-lg bg-gray-800/70">
         <div className="p-2">
@@ -133,13 +135,13 @@ export const Controls: React.FC<ControlsProps> = ({
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.707-10.293a1 1 0 00-1.414-1.414l-3 3a1 1 0 001.414 1.414L9 9.414V12a1 1 0 102 0V9.414l.293.293a1 1 0 001.414-1.414l-3-3z" clipRule="evenodd" />
                 </svg>
-                <span>Simular Excitação</span>
+                <span>{t('simulate_excitation')}</span>
             </button>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-9 gap-4">
           <div className="lg:col-span-2 md:col-span-4 col-span-2 grid grid-cols-2 gap-4">
               <Slider 
-                  label="Prótons"
+                  label={t('protons')}
                   value={atomState.protons}
                   min={1}
                   max={118}
@@ -147,7 +149,7 @@ export const Controls: React.FC<ControlsProps> = ({
                   colorClass="red"
               />
               <Slider 
-                  label="Nêutrons"
+                  label={t('neutrons')}
                   value={atomState.neutrons}
                   min={0}
                   max={177}
@@ -161,7 +163,7 @@ export const Controls: React.FC<ControlsProps> = ({
               {shellConfig.map((shell, index) => (
                 <Slider
                   key={shell.name}
-                  label={`Camada ${shell.name}`}
+                  label={t('shell', { shellName: shell.name })}
                   value={atomState.electrons[index]}
                   min={0}
                   max={shell.maxElectrons}

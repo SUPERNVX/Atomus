@@ -7,11 +7,13 @@ import { Timeline } from './components/Timeline';
 import { AtomState } from './types';
 import { SHELL_CONFIG } from './constants';
 import { WebGLResourceManager } from './utils/webgl-utils';
+import { useTranslation } from 'react-i18next';
 
 import { ELEMENTS } from './data/elements';
 
 import { ContextualInfo } from './components/ContextualInfo';
 import { MODEL_DATA } from './data/models';
+import { LanguageSwitcher } from './components/LanguageSwitcher';
 
 const AtomModel = lazy(() => import('./components/AtomModel').then(module => ({ default: module.AtomModel })));
 const DaltonModel = lazy(() => import('./components/DaltonModel').then(module => ({ default: module.DaltonModel })));
@@ -27,6 +29,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 const VALID_MODELS: ModelId[] = ['dalton', 'thomson', 'rutherford', 'sommerfeld', 'bohr', 'schrodinger'];
 
 const App: React.FC = () => {
+  const { t } = useTranslation();
   const [atomState, setAtomState] = useState<AtomState>({
     protons: 6,
     neutrons: 6,
@@ -158,7 +161,7 @@ const App: React.FC = () => {
   const [schrodingerActionId, setSchrodingerActionId] = useState(0);
 
   return (
-    <main style={{backgroundColor: '#111828'}} className="relative h-screen w-screen text-gray-200 flex flex-col overflow-hidden">
+    <main className="relative h-screen w-screen text-gray-200 flex flex-col overflow-hidden">
       <header className="absolute top-0 left-0 w-full p-4 z-10 flex justify-center items-start">
          <div className="absolute top-20 left-4 flex flex-col space-y-4">
             {(currentModel === 'bohr' || currentModel === 'sommerfeld' || currentModel === 'rutherford') && <Legend onUpdateElectrons={handleUpdateElectrons} />}
@@ -191,6 +194,7 @@ const App: React.FC = () => {
             key={canvasKey}
             {...canvasConfig}
           >
+            <color attach="background" args={['#111828']} />
             <group visible={currentModel === 'bohr'}>
               <AtomModel 
                 {...atomState} 
@@ -215,6 +219,8 @@ const App: React.FC = () => {
         </Suspense>
       </div>
       
+      <LanguageSwitcher />
+
       {/* Bohr Model Controls */}
       {currentModel === 'bohr' && (
         <footer className="absolute bottom-0 left-0 w-full p-4 bg-gray-900/50 backdrop-blur-sm z-10">

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 type ModelId = 'dalton' | 'thomson' | 'rutherford' | 'sommerfeld' | 'bohr' | 'schrodinger';
 
@@ -8,15 +9,16 @@ interface TimelineProps {
 }
 
 const models: { id: ModelId; name: string; year: number }[] = [
-  { id: 'dalton', name: 'Dalton', year: 1803 },
-  { id: 'thomson', name: 'Thomson', year: 1897 },
-  { id: 'rutherford', name: 'Rutherford', year: 1911 },
-  { id: 'bohr', name: 'Bohr', year: 1913 },
-  { id: 'sommerfeld', name: 'Sommerfeld', year: 1916 },
-  { id: 'schrodinger', name: 'Schrödinger', year: 1926 },
+  { id: 'dalton', name: 'dalton', year: 1803 },
+  { id: 'thomson', name: 'thomson', year: 1897 },
+  { id: 'rutherford', name: 'rutherford', year: 1911 },
+  { id: 'bohr', name: 'bohr', year: 1913 },
+  { id: 'sommerfeld', name: 'sommerfeld', year: 1916 },
+  { id: 'schrodinger', name: 'schrodinger', year: 1926 },
 ];
 
 export const Timeline: React.FC<TimelineProps> = ({ currentModel, onModelChange }) => {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center justify-center space-x-4 md:space-x-8 bg-gray-800/60 backdrop-blur-sm p-2 rounded-lg border border-gray-700">
       {models.map((model, index) => (
@@ -29,7 +31,7 @@ export const Timeline: React.FC<TimelineProps> = ({ currentModel, onModelChange 
                 : 'text-gray-400 hover:bg-gray-700/50'
             }`}
           >
-            <span className="font-semibold">{model.name}</span>
+            <span className="font-semibold">{t(model.name)}</span>
             <span className="ml-2 text-xs text-gray-500">{model.year}</span>
           </button>
           {index < models.length - 1 && (
