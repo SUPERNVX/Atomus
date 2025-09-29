@@ -248,7 +248,7 @@ const App: React.FC = () => {
               {/* Protons Slider */}
               <div className="flex flex-col space-y-2 w-48">
                 <div className="flex justify-between items-center text-sm">
-                  <label className="font-medium text-gray-300">Prótons</label>
+                  <label className="font-medium text-gray-300">{t('protons')}</label>
                   <span className="px-2 py-1 bg-gray-700 rounded text-xs font-mono">{atomState.protons}</span>
                 </div>
                 <input
@@ -264,7 +264,7 @@ const App: React.FC = () => {
               {/* Neutrons Slider */}
               <div className="flex flex-col space-y-2 w-48">
                 <div className="flex justify-between items-center text-sm">
-                  <label className="font-medium text-gray-300">Nêutrons</label>
+                  <label className="font-medium text-gray-300">{t('neutrons')}</label>
                   <span className="px-2 py-1 bg-gray-700 rounded text-xs font-mono">{atomState.neutrons}</span>
                 </div>
                 <input
@@ -282,7 +282,7 @@ const App: React.FC = () => {
             <div className="p-2 rounded-lg bg-gray-800/70">
               <div className="flex flex-col space-y-2 p-2">
                 <div className="flex justify-between items-center text-sm">
-                  <label className="font-medium text-gray-300">Espessura das Órbitas</label>
+                  <label className="font-medium text-gray-300">{t('orbit_thickness')}</label>
                   <span className="px-2 py-1 bg-gray-700 rounded text-xs font-mono">{orbitThickness}</span>
                 </div>
                 <input
@@ -309,7 +309,7 @@ const App: React.FC = () => {
                 {/* Protons Slider */}
                 <div className="flex flex-col space-y-2">
                   <div className="flex justify-between items-center text-sm">
-                    <label className="font-medium text-gray-300">Prótons</label>
+                    <label className="font-medium text-gray-300">{t('protons')}</label>
                     <span className="px-2 py-1 bg-gray-700 rounded text-xs font-mono">{atomState.protons}</span>
                   </div>
                   <input
@@ -325,7 +325,7 @@ const App: React.FC = () => {
                 {/* Neutrons Slider */}
                 <div className="flex flex-col space-y-2">
                   <div className="flex justify-between items-center text-sm">
-                    <label className="font-medium text-gray-300">Nêutrons</label>
+                    <label className="font-medium text-gray-300">{t('neutrons')}</label>
                     <span className="px-2 py-1 bg-gray-700 rounded text-xs font-mono">{atomState.neutrons}</span>
                   </div>
                   <input
@@ -344,7 +344,7 @@ const App: React.FC = () => {
                 {SHELL_CONFIG.map((shell, index) => (
                   <div key={shell.name} className="flex flex-col space-y-2">
                     <div className="flex justify-between items-center text-sm">
-                      <label className="font-medium text-gray-300">Camada {shell.name}</label>
+                      <label className="font-medium text-gray-300">{t('shell', { shellName: shell.name })}</label>
                       <span className="px-2 py-1 bg-gray-700 rounded text-xs font-mono">{atomState.electrons[index] || 0}</span>
                     </div>
                     <input
@@ -364,7 +364,7 @@ const App: React.FC = () => {
             <div className="p-2 rounded-lg bg-gray-800/70">
               <div className="flex flex-col space-y-2 p-2">
                 <div className="flex justify-between items-center text-sm">
-                  <label className="font-medium text-gray-300">Espessura das Órbitas</label>
+                  <label className="font-medium text-gray-300">{t('orbit_thickness')}</label>
                   <span className="px-2 py-1 bg-gray-700 rounded text-xs font-mono">{orbitThickness}</span>
                 </div>
                 <input
@@ -384,8 +384,8 @@ const App: React.FC = () => {
       {currentModel === 'schrodinger' && (
         <footer className="absolute bottom-0 left-0 w-full p-4 bg-gray-900/50 backdrop-blur-sm z-10">
             <div className="max-w-md mx-auto p-2 rounded-lg bg-gray-800/70 flex space-x-2">
-                <button onClick={() => { setSchrodingerMode('position'); setSchrodingerActionId(p => p + 1); }} className="w-full bg-indigo-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-600 transition-colors duration-200">Definir Posição</button>
-                <button onClick={() => { setSchrodingerMode('trajectory'); setSchrodingerActionId(p => p + 1); }} className="w-full bg-purple-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-purple-600 transition-colors duration-200">Definir Trajetória</button>
+                <button onClick={() => { setSchrodingerMode('position'); setSchrodingerActionId(p => p + 1); }} className="w-full bg-indigo-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-600 transition-colors duration-200">{t('define_position')}</button>
+                <button onClick={() => { setSchrodingerMode('trajectory'); setSchrodingerActionId(p => p + 1); }} className="w-full bg-purple-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-purple-600 transition-colors duration-200">{t('define_trajectory')}</button>
             </div>
         </footer>
         )}
@@ -395,7 +395,7 @@ const App: React.FC = () => {
           <div className="max-w-md mx-auto p-2 rounded-lg bg-gray-800/70">
             <div className="flex flex-col space-y-2 p-2">
                 <div className="flex justify-between items-center text-sm">
-                    <label className="font-medium text-gray-300">Pares de Carga (+/-)</label>
+                    <label className="font-medium text-gray-300">{t('charge_pairs')}</label>
                     <span className="px-2 py-1 bg-gray-700 rounded text-xs font-mono">{thomsonChargeCount}</span>
                 </div>
                 <input
