@@ -1,5 +1,7 @@
 # 3D Atomic Model Visualizer
 
+[![Preview](https://img.shields.io/badge/Preview-Link-green)](https://supernvx.github.io/Atomus/)
+
 An interactive 3D visualization tool for atomic models, designed for educational purposes to help students understand atomic structure and quantum mechanics concepts through visual representations.
 
 ## Features
@@ -26,6 +28,10 @@ An interactive 3D visualization tool for atomic models, designed for educational
   - Smooth 3D rendering using Three.js
   - Optimized performance with React Three Fiber
   - Vector-style orbitals with adjustable thickness
+
+## Preview
+
+![Bohr Atomic Model](./public/print.png)
 
 ## Models Included
 
@@ -94,12 +100,12 @@ The built files will be in the `dist` folder.
 
 ## Technologies Used
 
-- **React**: Component-based UI library
-- **Three.js**: 3D graphics library
-- **React Three Fiber**: React renderer for Three.js
-- **TypeScript**: Type-safe JavaScript
-- **Tailwind CSS**: Utility-first CSS framework
-- **Vite**: Fast build tool and development server
+- ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+- ![Three.js](https://img.shields.io/badge/Three.js-000000?style=for-the-badge&logo=threedotjs&logoColor=white)
+- ![React Three Fiber](https://img.shields.io/badge/React%20Three%20Fiber-000000?style=for-the-badge&logo=react&logoColor=61DAFB)
+- ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+- ![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+- ![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 
 ## Educational Use Cases
 
@@ -110,38 +116,13 @@ This application is designed to support various educational scenarios:
 - **Interactive Demonstrations**: Visualizing atomic models in real-time
 - **Comparative Analysis**: Comparing different atomic models side-by-side
 
-## Customization
-
-The application can be customized for specific educational needs:
-
-- Add new atomic models
-- Modify existing models
-- Change visual parameters (colors, sizes)
-- Adjust simulation parameters
-
-## Deployment
-
-This project is configured for deployment to GitHub Pages:
-
-1. Build the project: `npm run build`
-2. The `dist` folder contains the deployable files
-3. Configure GitHub Pages to serve from the `dist` folder
-
 ## Contributing
 
 Contributions are welcome! Feel free to submit pull requests for:
-- New atomic models
 - Educational features
 - Performance improvements
 - Bug fixes
-- Documentation enhancements
 
 ## License
 
 This project is open source and available under the [MIT License](LICENSE).
-
-## Acknowledgments
-
-- Built with React Three Fiber for seamless Three.js integration
-- Uses Tailwind CSS for responsive design
-- Vite for lightning-fast development
