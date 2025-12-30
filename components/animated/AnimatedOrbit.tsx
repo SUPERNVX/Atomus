@@ -13,44 +13,67 @@ interface AnimatedOrbitProps {
   radiusX: number;
   radiusZ: number;
   speed: number;
-  thickness?: number; // Optional thickness parameter for orbit line width
-  focus?: number; // Optional focus offset for Sommerfeld model
+  thickness?: number;
+  focus?: number;
+  electronCount?: number; // New prop for multiple electrons
 }
 
-export const AnimatedOrbit: React.FC<AnimatedOrbitProps> = ({ tilt, radiusX, radiusZ, speed, thickness = 2, focus = 0 }) => {
-  const electronRef = useRef<THREE.Mesh>(null);
+export const AnimatedOrbit: React.FC<AnimatedOrbitProps> = ({
+  tilt,
+  radiusX,
+  radiusZ,
+  speed,
+  thickness = 2,
+  focus = 0,
+  electronCount = 1
+}) => {
+  const electronsRef = useRef<THREE.InstancedMesh>(null);
 
-  // Animate electron position along the orbit
-  useFrame(({ clock }) => {
-    if (electronRef.current) {
-      const t = clock.getElapsedTime() * speed;
-      electronRef.current.position.x = Math.cos(t) * radiusX + focus;
-      electronRef.current.position.z = Math.sin(t) * radiusZ;
-    }
-  });
-
-  // Calculate the points for the orbit line with higher resolution for better quality
+  // Calculate points for the orbit line
   const points = useMemo(() => {
     const p = [];
-    // Increase resolution from 360 to 720 points for smoother curves
     for (let i = 0; i <= 720; i++) {
-      const rad = (i * Math.PI) / 360; // Double the resolution
+      const rad = (i * Math.PI) / 360;
       p.push(new THREE.Vector3(Math.cos(rad) * radiusX + focus, 0, Math.sin(rad) * radiusZ));
     }
     return p;
   }, [radiusX, radiusZ, focus]);
 
+  // Animate electrons
+  useFrame(({ clock }) => {
+    if (electronsRef.current) {
+      const time = clock.getElapsedTime() * speed;
+      const dummy = new THREE.Object3D();
+
+      for (let i = 0; i < electronCount; i++) {
+        // Distribute electrons evenly along the orbit
+        const offset = (i / electronCount) * Math.PI * 2;
+        const t = time + offset;
+
+        dummy.position.x = Math.cos(t) * radiusX + focus;
+        dummy.position.z = Math.sin(t) * radiusZ;
+        dummy.updateMatrix();
+
+        electronsRef.current.setMatrixAt(i, dummy.matrix);
+      }
+      electronsRef.current.instanceMatrix.needsUpdate = true;
+    }
+  });
+
   return (
     <group rotation={tilt}>
-      <Line 
-        points={points} 
-        color={COLORS.orbit} 
-        lineWidth={thickness} 
-        transparent 
-        opacity={0.7} 
-        visible={thickness > 0} // Only show if thickness is greater than 0
+      <Line
+        points={points}
+        color={COLORS.orbit}
+        lineWidth={thickness}
+        transparent
+        opacity={0.7}
+        visible={thickness > 0}
       />
-      <mesh ref={electronRef} geometry={electronGeometry} material={electronMaterial} />
+      <instancedMesh
+        ref={electronsRef}
+        args={[electronGeometry, electronMaterial, electronCount]}
+      />
     </group>
   );
 };

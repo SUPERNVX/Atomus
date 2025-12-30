@@ -3,11 +3,21 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { OrbitControls, Text } from '@react-three/drei';
 import { SHELL_CONFIG, COLORS } from '../constants';
+import { ExcitedElectron } from './animated/ExcitedElectron';
 
 interface AtomModelProps {
   protons: number;
   neutrons: number;
   electrons: number[];
+  excitation?: {
+    active: boolean;
+    shellIndex: number;
+    targetShellIndex: number;
+    electronIndex: number; // Which electron in the shell is excited
+    onComplete: () => void;
+  };
+  showEffects?: boolean;
+  onParticleClick?: (type: 'proton' | 'neutron' | 'electron') => void;
 }
 
 // --- Optimized Particle (for use in other components like Schrodinger) ---
@@ -32,22 +42,84 @@ export const Particle: React.FC<{
 const nucleusParticleGeometry = new THREE.SphereGeometry(0.4, 16, 16);
 const protonMaterial = new THREE.MeshStandardMaterial({ color: COLORS.proton, roughness: 0.5, metalness: 0.1 });
 const neutronMaterial = new THREE.MeshStandardMaterial({ color: COLORS.neutron, roughness: 0.5, metalness: 0.1 });
+const neonProtonMaterial = new THREE.MeshStandardMaterial({ color: COLORS.proton, emissive: COLORS.proton, emissiveIntensity: 1.5, toneMapped: false });
+const neonNeutronMaterial = new THREE.MeshStandardMaterial({ color: COLORS.neutron, emissive: COLORS.neutron, emissiveIntensity: 1.5, toneMapped: false });
 
-export const Nucleus: React.FC<{ protons: number; neutrons: number }> = ({ protons, neutrons }) => {
+export const Nucleus: React.FC<{
+  protons: number;
+  neutrons: number;
+  showEffects?: boolean;
+  onParticleClick?: (type: 'proton' | 'neutron') => void;
+}> = ({ protons, neutrons, showEffects, onParticleClick }) => {
   const protonRef = useRef<THREE.InstancedMesh>(null);
   const neutronRef = useRef<THREE.InstancedMesh>(null);
+  const groupRef = useRef<THREE.Group>(null);
+
+  // Nucleus Pulse Animation
+  useFrame((state) => {
+    if (showEffects && groupRef.current) {
+      const t = state.clock.elapsedTime;
+      const scale = 1 + Math.sin(t * 2) * 0.02; // Subtle breathing
+      groupRef.current.scale.set(scale, scale, scale);
+    } else if (groupRef.current) {
+      groupRef.current.scale.set(1, 1, 1);
+    }
+  });
 
   const { protonPositions, neutronPositions } = useMemo(() => {
-    const protonPos = [];
-    const neutronPos = [];
-    const radius = 1.5;
-    for (let i = 0; i < protons; i++) {
-        protonPos.push(new THREE.Vector3().randomDirection().multiplyScalar(Math.random() * radius));
+    const totalParticles = protons + neutrons;
+    const particleRadius = 0.4;
+    const gap = 0.1; // Small gap between particles
+    const minDistance = (particleRadius * 2) + gap;
+    const positions: THREE.Vector3[] = [];
+
+    // 1. Initialize positions randomly within a small sphere
+    // Scale initial radius with number of particles to avoid extreme initial overlap
+    const initialRadius = Math.pow(totalParticles, 1 / 3) * particleRadius * 1.5;
+
+    for (let i = 0; i < totalParticles; i++) {
+      // eslint-disable-next-line react-hooks/purity
+      positions.push(new THREE.Vector3().randomDirection().multiplyScalar(Math.random() * initialRadius));
     }
-    for (let i = 0; i < neutrons; i++) {
-        neutronPos.push(new THREE.Vector3().randomDirection().multiplyScalar(Math.random() * radius));
+
+    // 2. Relaxation iterations to resolve overlaps (Force-directed graph approach)
+    const iterations = 50;
+    for (let iter = 0; iter < iterations; iter++) {
+      // Repulsion
+      for (let i = 0; i < totalParticles; i++) {
+        for (let j = i + 1; j < totalParticles; j++) {
+          const p1 = positions[i];
+          const p2 = positions[j];
+          const diff = new THREE.Vector3().subVectors(p1, p2);
+          const dist = diff.length();
+
+          if (dist < minDistance && dist > 0.001) {
+            const overlap = minDistance - dist;
+            const push = diff.normalize().multiplyScalar(overlap * 0.5);
+            p1.add(push);
+            p2.sub(push);
+          } else if (dist <= 0.001) {
+            // Handle exact overlap (rare but possible)
+            p1.add(new THREE.Vector3(0.01, 0, 0));
+          }
+        }
+      }
+
+      // Attraction to center (to keep nucleus compact)
+      for (let i = 0; i < totalParticles; i++) {
+        positions[i].sub(positions[i].clone().multiplyScalar(0.05));
+      }
     }
-    return { protonPositions: protonPos, neutronPositions: neutronPos };
+
+    // 3. Assign positions to protons and neutrons
+    // Shuffle positions to mix protons and neutrons randomly
+    // eslint-disable-next-line react-hooks/purity
+    const shuffled = [...positions].sort(() => Math.random() - 0.5);
+
+    return {
+      protonPositions: shuffled.slice(0, protons),
+      neutronPositions: shuffled.slice(protons)
+    };
   }, [protons, neutrons]);
 
   useEffect(() => {
@@ -68,12 +140,23 @@ export const Nucleus: React.FC<{ protons: number; neutrons: number }> = ({ proto
       });
       neutronRef.current.instanceMatrix.needsUpdate = true;
     }
-  }, [protonPositions, neutronPositions]);
+  }, [protonPositions, neutronPositions, showEffects]);
+
+  const activeProtonMaterial = showEffects ? neonProtonMaterial : protonMaterial;
+  const activeNeutronMaterial = showEffects ? neonNeutronMaterial : neutronMaterial;
 
   return (
-    <group>
-      <instancedMesh ref={protonRef} args={[nucleusParticleGeometry, protonMaterial, protons]} />
-      <instancedMesh ref={neutronRef} args={[nucleusParticleGeometry, neutronMaterial, neutrons]} />
+    <group ref={groupRef}>
+      <instancedMesh
+        ref={protonRef}
+        args={[nucleusParticleGeometry, activeProtonMaterial, protons]}
+        onClick={(e) => { e.stopPropagation(); onParticleClick?.('proton'); }}
+      />
+      <instancedMesh
+        ref={neutronRef}
+        args={[nucleusParticleGeometry, activeNeutronMaterial, neutrons]}
+        onClick={(e) => { e.stopPropagation(); onParticleClick?.('neutron'); }}
+      />
     </group>
   );
 };
@@ -83,7 +166,14 @@ const ringMaterial = new THREE.MeshBasicMaterial({ color: COLORS.orbit, side: TH
 const electronGeometry = new THREE.SphereGeometry(0.3, 16, 16);
 const electronMaterial = new THREE.MeshStandardMaterial({ color: COLORS.electron, emissive: COLORS.electron, emissiveIntensity: 2 });
 
-const ElectronShell: React.FC<{ count: number; shellIndex: number }> = ({ count, shellIndex }) => {
+export const getShellSpeed = (index: number) => 0.5 / (index + 1);
+
+const ElectronShell: React.FC<{
+  count: number;
+  shellIndex: number;
+  skipElectronIndex?: number;
+  onElectronClick?: () => void;
+}> = ({ count, shellIndex, skipElectronIndex, onElectronClick }) => {
   const shell = SHELL_CONFIG[shellIndex];
   const groupRef = useRef<THREE.Group>(null);
   const instancesRef = useRef<THREE.InstancedMesh>(null);
@@ -92,7 +182,7 @@ const ElectronShell: React.FC<{ count: number; shellIndex: number }> = ({ count,
 
   useFrame((_, delta) => {
     if (groupRef.current) {
-      groupRef.current.rotation.y += delta * (0.5 / (shellIndex + 1));
+      groupRef.current.rotation.y += delta * getShellSpeed(shellIndex);
     }
   });
 
@@ -110,13 +200,18 @@ const ElectronShell: React.FC<{ count: number; shellIndex: number }> = ({ count,
     if (instancesRef.current) {
       const dummy = new THREE.Object3D();
       electronPositions.forEach((pos, i) => {
+        if (i === skipElectronIndex) {
+          dummy.scale.set(0, 0, 0); // Hide this electron
+        } else {
+          dummy.scale.set(1, 1, 1);
+        }
         dummy.position.copy(pos);
         dummy.updateMatrix();
         instancesRef.current!.setMatrixAt(i, dummy.matrix);
       });
       instancesRef.current.instanceMatrix.needsUpdate = true;
     }
-  }, [electronPositions]);
+  }, [electronPositions, skipElectronIndex]);
 
   return (
     <group>
@@ -124,7 +219,11 @@ const ElectronShell: React.FC<{ count: number; shellIndex: number }> = ({ count,
 
       {count > 0 && (
         <group ref={groupRef}>
-            <instancedMesh ref={instancesRef} args={[electronGeometry, electronMaterial, count]} />
+          <instancedMesh
+            ref={instancesRef}
+            args={[electronGeometry, electronMaterial, count]}
+            onClick={(e) => { e.stopPropagation(); onElectronClick?.(); }}
+          />
         </group>
       )}
 
@@ -141,7 +240,7 @@ const ElectronShell: React.FC<{ count: number; shellIndex: number }> = ({ count,
   );
 };
 
-export const AtomModel: React.FC<AtomModelProps> = ({ protons, neutrons, electrons }) => {
+export const AtomModel: React.FC<AtomModelProps> = ({ protons, neutrons, electrons, excitation, showEffects, onParticleClick }) => {
   return (
     <>
       <ambientLight intensity={0.8} />
@@ -150,10 +249,32 @@ export const AtomModel: React.FC<AtomModelProps> = ({ protons, neutrons, electro
       <OrbitControls enablePan={true} enableZoom={true} enableRotate={true} />
 
       <group>
-        <Nucleus protons={protons} neutrons={neutrons} />
+        <Nucleus
+          protons={protons}
+          neutrons={neutrons}
+          showEffects={showEffects}
+          onParticleClick={onParticleClick}
+        />
         {SHELL_CONFIG.map((shell, index) => (
-          <ElectronShell key={index} count={electrons[index] || 0} shellIndex={index} />
+          <ElectronShell
+            key={index}
+            count={electrons[index] || 0}
+            shellIndex={index}
+            skipElectronIndex={excitation && excitation.shellIndex === index ? excitation.electronIndex : undefined}
+            onElectronClick={() => onParticleClick?.('electron')}
+          />
         ))}
+
+        {excitation && excitation.active && (
+          <ExcitedElectron
+            startRadius={SHELL_CONFIG[excitation.shellIndex].radius}
+            endRadius={SHELL_CONFIG[excitation.targetShellIndex].radius}
+            angle={(excitation.electronIndex / electrons[excitation.shellIndex]) * Math.PI * 2}
+            sourceSpeed={getShellSpeed(excitation.shellIndex)}
+            targetSpeed={getShellSpeed(excitation.targetShellIndex)}
+            onComplete={excitation.onComplete}
+          />
+        )}
       </group>
     </>
   );

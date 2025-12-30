@@ -1,4 +1,3 @@
-
 {
   "recovering_context": "Recuperando contexto 3D...",
   "loading_visualization": "Carregando visualização...",
@@ -172,5 +171,14 @@
   "moscovium": "Moscóvio",
   "livermorium": "Livermório",
   "tennessine": "Tenessino",
-  "oganesson": "Oganessônio"
+  "oganesson": "Oganessônio",
+  "isotope": "Isótopo",
+  "stable": "Estável",
+  "unstable": "Instável",
+  "protonDesc": "Partícula carregada positivamente no núcleo. Determina a identidade do elemento.",
+  "neutronDesc": "Partícula neutra no núcleo. Estabiliza o átomo via força nuclear forte.",
+  "electronDesc": "Partícula carregada negativamente orbitando o núcleo. Determina ligações químicas.",
+  "toggle_effects": "Alternar Efeitos",
+  "start_tour": "🎥 Iniciar Tour",
+  "stop_tour": "⏹ Parar Tour"
 }

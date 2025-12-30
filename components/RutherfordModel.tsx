@@ -1,8 +1,6 @@
-import React, { useMemo, useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
+import React, { useMemo } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from '@react-three/drei';
-import { COLORS } from '../constants';
 import { Nucleus } from './AtomModel';
 import { AnimatedOrbit } from './animated/AnimatedOrbit';
 
@@ -27,15 +25,16 @@ interface RutherfordModelProps {
 }
 
 export const RutherfordModel: React.FC<RutherfordModelProps> = ({ protons, neutrons, orbitThickness = 2 }) => {
-    const electrons = useMemo(() => {
-        const arr = [];
-        for (let i = 0; i < protons; i++) {
-            const orbit = orbits[i % orbits.length];
-            const speed = 0.5 + Math.random() * 0.5;
-            arr.push({ ...orbit, speed });
-        }
-        return arr;
-    }, [protons]);
+  const electrons = useMemo(() => {
+    const arr = [];
+    for (let i = 0; i < protons; i++) {
+      const orbit = orbits[i % orbits.length];
+      // eslint-disable-next-line react-hooks/purity
+      const speed = 0.5 + Math.random() * 0.5;
+      arr.push({ ...orbit, speed });
+    }
+    return arr;
+  }, [protons]);
 
   return (
     <>
@@ -47,7 +46,7 @@ export const RutherfordModel: React.FC<RutherfordModelProps> = ({ protons, neutr
       <group>
         <Nucleus protons={protons} neutrons={neutrons} />
         {electrons.map((e, i) => (
-            <AnimatedOrbit key={i} tilt={e.tilt} radiusX={e.radiusX} radiusZ={e.radiusZ} speed={e.speed} thickness={orbitThickness} />
+          <AnimatedOrbit key={i} tilt={e.tilt} radiusX={e.radiusX} radiusZ={e.radiusZ} speed={e.speed} thickness={orbitThickness} />
         ))}
       </group>
     </>
