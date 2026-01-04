@@ -22,10 +22,11 @@ const ThomsonModel = lazy(() => import('./components/ThomsonModel').then(module 
 const RutherfordModel = lazy(() => import('./components/RutherfordModel').then(module => ({ default: module.RutherfordModel })));
 const SommerfeldModel = lazy(() => import('./components/SommerfeldModel').then(module => ({ default: module.SommerfeldModel })));
 const SchrodingerModel = lazy(() => import('./components/SchrodingerModel').then(module => ({ default: module.SchrodingerModel })));
+const QuantumEntanglementModel = lazy(() => import('./components/QuantumEntanglementModel').then(module => ({ default: module.QuantumEntanglementModel })));
 
-type ModelId = 'dalton' | 'thomson' | 'rutherford' | 'sommerfeld' | 'bohr' | 'schrodinger';
+type ModelId = 'dalton' | 'thomson' | 'rutherford' | 'sommerfeld' | 'bohr' | 'schrodinger' | 'entanglement';
 
-const VALID_MODELS: ModelId[] = ['dalton', 'thomson', 'rutherford', 'sommerfeld', 'bohr', 'schrodinger'];
+const VALID_MODELS: ModelId[] = ['dalton', 'thomson', 'rutherford', 'sommerfeld', 'bohr', 'schrodinger', 'entanglement'];
 
 const App: React.FC = () => {
   const { t } = useTranslation();
@@ -208,6 +209,7 @@ const App: React.FC = () => {
             <group visible={currentModel === 'schrodinger'}>
               <SchrodingerModel protons={atomState.protons} neutrons={atomState.neutrons} mode={schrodingerMode} actionId={schrodingerActionId} />
             </group>
+            {currentModel === 'entanglement' && <QuantumEntanglementModel />}
             <group visible={currentModel === 'sommerfeld'}>
               <SommerfeldModel protons={atomState.protons} neutrons={atomState.neutrons} electrons={atomState.electrons} orbitThickness={orbitThickness} />
             </group>

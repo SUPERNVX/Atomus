@@ -41,5 +41,11 @@ export const MODEL_DATA: Record<string, ModelInfo> = {
     description: "schrodinger_description",
     experiment: "schrodinger_experiment",
     limitations: "schrodinger_limitations"
+  },
+  entanglement: {
+    title: "entanglement_title",
+    description: "entanglement_description",
+    experiment: "entanglement_experiment",
+    limitations: "entanglement_limitations"
   }
 };

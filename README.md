@@ -13,21 +13,25 @@ An interactive 3D visualization tool for atomic models, designed for educational
   - Bohr Model
   - Sommerfeld Model
   - Schrödinger Model
+  - Quantum Entanglement (Interactive Simulation)
 
 - **Adjustable Parameters**: 
   - Protons, neutrons, and electrons sliders
   - Orbit thickness control
   - Electron shell configuration
+  - Qubit state rotation and distance control (for entanglement)
 
 - **Educational Controls**:
   - Simulation of atomic excitation (for Bohr model)
   - Interactive timeline to switch between models
+  - Guided narrative for Quantum Entanglement (Hadamard, CNOT, and Measurement)
   - Information panels with atomic data
 
 - **High-Quality Visuals**:
   - Smooth 3D rendering using Three.js
   - Optimized performance with React Three Fiber
   - Vector-style orbitals with adjustable thickness
+  - 3D Bloch Spheres for qubit state visualization
 
 ## Preview
 
@@ -44,6 +48,7 @@ An interactive 3D visualization tool for atomic models, designed for educational
 - **Bohr Model**: Planetary model with defined electron shells
 - **Sommerfeld Model**: Extended Bohr model with elliptical orbits
 - **Schrödinger Model**: Quantum mechanical probability clouds
+- **Quantum Entanglement (1935)**: Interactive simulation of non-locality and wave function collapse using Bloch Spheres.
 
 ## Getting Started
 
