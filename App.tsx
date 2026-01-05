@@ -9,8 +9,6 @@ import { AtomState } from './types';
 import { SHELL_CONFIG } from './constants';
 import { useTranslation } from 'react-i18next';
 import { ELEMENTS } from './data/elements';
-import { ContextualInfo } from './components/ContextualInfo';
-import { MODEL_DATA } from './data/models';
 import { LanguageSwitcher } from './components/LanguageSwitcher';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ParticleInfoPopup } from './components/ParticleInfoPopup';
@@ -147,12 +145,13 @@ const App: React.FC = () => {
   return (
     <main className="relative h-screen w-screen text-gray-200 flex flex-col overflow-hidden">
       <header className="absolute top-0 left-0 w-full p-4 z-10 flex justify-center items-start pointer-events-none">
-        <div className="absolute top-20 left-4 flex flex-col space-y-4 pointer-events-auto">
-          {(currentModel === 'bohr' || currentModel === 'sommerfeld' || currentModel === 'rutherford') && <Legend onUpdateElectrons={handleUpdateElectrons} />}
-          {MODEL_DATA[currentModel] && <ContextualInfo data={MODEL_DATA[currentModel]} />}
-        </div>
+
         <div className="pointer-events-auto">
-          <Timeline currentModel={currentModel} onModelChange={handleModelChange} />
+          <Timeline
+            currentModel={currentModel}
+            onModelChange={handleModelChange}
+            onUpdateElectrons={handleUpdateElectrons}
+          />
         </div>
 
         <div className="absolute top-4 right-4 pointer-events-auto flex flex-col items-end space-y-2">
@@ -171,6 +170,9 @@ const App: React.FC = () => {
           >
             {tourActive ? t('stop_tour') : t('start_tour')}
           </button>
+
+          {/* Legend moved here for safe stacking */}
+          {(currentModel === 'bohr' || currentModel === 'sommerfeld' || currentModel === 'rutherford') && <Legend />}
         </div>
       </header>
 
