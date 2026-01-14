@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MODEL_DATA } from '../data/models';
 
@@ -22,10 +22,27 @@ const models: { id: ModelId; name: string; year: number }[] = [
 
 export const Timeline: React.FC<TimelineProps> = ({ currentModel, onModelChange, onUpdateElectrons }) => {
   const { t } = useTranslation();
-  const [activeModel, setActiveModel] = useState<ModelId>(currentModel);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const itemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   useEffect(() => {
-    setActiveModel(currentModel);
+    const container = containerRef.current;
+    const activeItem = itemRefs.current[currentModel];
+
+    if (container && activeItem) {
+      setTimeout(() => {
+        const containerHeight = container.clientHeight;
+        const itemTop = activeItem.offsetTop;
+        const itemHeight = activeItem.clientHeight;
+        const targetScrollTop = itemTop - containerHeight / 2 + itemHeight / 2;
+
+        container.scrollTo({
+          top: targetScrollTop,
+          behavior: 'smooth',
+        });
+      }, 100);
+    }
   }, [currentModel]);
 
   return (
@@ -33,7 +50,10 @@ export const Timeline: React.FC<TimelineProps> = ({ currentModel, onModelChange,
       {/* Vertical Line */}
       <div className="absolute left-[39px] top-0 bottom-0 w-[2px] bg-gray-700/50 -z-10" />
 
-      <div className="flex flex-col space-y-12 pointer-events-auto h-full overflow-y-auto no-scrollbar pt-20 pb-40 pl-[28px] pr-8">
+      <div
+        ref={containerRef}
+        className="flex flex-col space-y-12 pointer-events-auto h-full overflow-y-auto no-scrollbar pt-20 pb-40 pl-[28px] pr-8 scroll-smooth"
+      >
         <style>{`
           .no-scrollbar::-webkit-scrollbar {
             display: none;
@@ -44,11 +64,15 @@ export const Timeline: React.FC<TimelineProps> = ({ currentModel, onModelChange,
           }
         `}</style>
         {models.map((model) => {
-          const isActive = activeModel === model.id;
+          const isActive = currentModel === model.id;
           const modelData = MODEL_DATA[model.id];
 
           return (
-            <div key={model.id} className="relative group flex items-start flex-shrink-0">
+            <div
+              key={model.id}
+              ref={(el) => (itemRefs.current[model.id] = el)}
+              className="relative group flex items-start flex-shrink-0"
+            >
               {/* Dot Indicator */}
               <button
                 onClick={() => onModelChange(model.id)}
