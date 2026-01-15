@@ -70,7 +70,7 @@ export const Timeline: React.FC<TimelineProps> = ({ currentModel, onModelChange,
           return (
             <div
               key={model.id}
-              ref={(el) => (itemRefs.current[model.id] = el)}
+              ref={(el) => { itemRefs.current[model.id] = el; }}
               className="relative group flex items-start flex-shrink-0"
             >
               {/* Dot Indicator */}

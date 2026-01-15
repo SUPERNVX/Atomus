@@ -208,5 +208,11 @@
   "electronDesc": "Partícula carregada negativamente orbitando o núcleo. Determina ligações químicas.",
   "toggle_effects": "Alternar Efeitos",
   "start_tour": "🎥 Iniciar Tour",
-  "stop_tour": "⏹ Parar Tour"
+  "stop_tour": "⏹ Parar Tour",
+  "schrodinger_mode_cloud": "Modo Nuvem",
+  "schrodinger_mode_measurement": "Modo Medição",
+  "schrodinger_mode_wave": "Modo Onda",
+  "quantum_n_label": "N (Nível de Energia)",
+  "quantum_l_label": "L (Subcamada)",
+  "quantum_m_label": "M (Orientação)"
 }

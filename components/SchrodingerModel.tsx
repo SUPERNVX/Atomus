@@ -1,120 +1,193 @@
-import React, { useMemo } from 'react';
-import * as THREE from 'three';
-import { OrbitControls, Line, Cone } from '@react-three/drei';
+import React, { useMemo, useState, useRef, useEffect } from 'react';
+import { OrbitControls, Html } from '@react-three/drei';
+import { useFrame } from '@react-three/fiber';
+import { Nucleus } from './AtomModel';
+import { generateOrbitalPoints } from '../utils/quantumPhysics';
 import { COLORS } from '../constants';
-import { Nucleus, Particle } from './AtomModel';
-
-const CLOUD_RADIUS = 10;
-
-const ProbabilityCloud: React.FC = () => {
-    const points = useMemo(() => {
-        const p = [];
-        for (let i = 0; i < 20000; i++) {
-            // eslint-disable-next-line react-hooks/purity
-            const pos = new THREE.Vector3().randomDirection().multiplyScalar(Math.random() * CLOUD_RADIUS);
-            p.push(pos);
-        }
-        return p;
-    }, []);
-
-    return (
-        <points>
-            <bufferGeometry attach="geometry">
-                <bufferAttribute
-                    attach="attributes-position"
-                    count={points.length}
-                    array={new Float32Array(points.flatMap(p => p.toArray()))}
-                    itemSize={3}
-                />
-            </bufferGeometry>
-            <pointsMaterial attach="material" size={0.05} color={COLORS.electron} transparent opacity={0.5} />
-        </points>
-    );
-};
-
-const TrajectoryArrow: React.FC<{ start: THREE.Vector3, end: THREE.Vector3 }> = ({ start, end }) => {
-    const quaternion = useMemo(() => {
-        const defaultDirection = new THREE.Vector3(0, 1, 0); // Default direction of Cone geometry
-        const targetDirection = end.clone().sub(start).normalize();
-        return new THREE.Quaternion().setFromUnitVectors(defaultDirection, targetDirection);
-    }, [start, end]);
-
-    return (
-        <group>
-            <Line points={[start, end]} color="#818cf8" lineWidth={2} />
-            <Cone
-                args={[0.2, 0.5, 8]} // radius, height, radialSegments
-                position={end}
-                quaternion={quaternion}
-            >
-                <meshBasicMaterial color="#818cf8" />
-            </Cone>
-        </group>
-    );
-};
+import * as THREE from 'three';
 
 interface SchrodingerModelProps {
-    protons: number;
-    neutrons: number;
-    mode: 'position' | 'trajectory' | 'none';
-    actionId: number;
+  protons: number;
+  neutrons: number;
+  n?: number;
+  l?: number;
+  m?: number;
+  viewMode?: 'cloud' | 'measurement' | 'wave';
 }
 
-const schrodingerElectronMaterial = new THREE.MeshStandardMaterial({ color: COLORS.electron, emissive: COLORS.electron, emissiveIntensity: 2 });
+export const SchrodingerModel: React.FC<SchrodingerModelProps> = ({ 
+  protons, 
+  neutrons,
+  n = 1,
+  l = 0,
+  m = 0,
+  viewMode = 'cloud'
+}) => {
+  const pointsRef = useRef<THREE.Points>(null);
+  const [measuredPoints, setMeasuredPoints] = useState<Float32Array>(new Float32Array(0));
+  
+  // Static Cloud (12k points)
+  const cloudPoints = useMemo(() => {
+    const rawPoints = generateOrbitalPoints(n, l, m, 12000);
+    const positions = new Float32Array(rawPoints.length * 3);
+    for (let i = 0; i < rawPoints.length; i++) {
+      positions[i * 3] = rawPoints[i].x;
+      positions[i * 3 + 1] = rawPoints[i].y;
+      positions[i * 3 + 2] = rawPoints[i].z;
+    }
+    return positions;
+  }, [n, l, m]);
 
-export const SchrodingerModel: React.FC<SchrodingerModelProps> = ({ protons, neutrons, mode, actionId }) => {
-    const { position, trajectory } = useMemo(() => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-        actionId; // Trigger re-calculation
-        const totalParticles = protons + neutrons;
-        // Dynamic radius: Base 2.0 + factor of total particles. 
-        // Example: Carbon (12) -> ~3.5. Uranium (238) -> ~8.0
-        const nucleusRadius = Math.max(3.0, Math.pow(totalParticles, 1 / 3) * 1.5);
+  // Reset measurements when orbital changes
+  useEffect(() => {
+    setMeasuredPoints(new Float32Array(0));
+  }, [n, l, m, viewMode]);
 
-        if (mode === 'position') {
-            let pos;
-            do {
-                // eslint-disable-next-line react-hooks/purity
-                pos = new THREE.Vector3().randomDirection().multiplyScalar(Math.random() * CLOUD_RADIUS);
-            } while (pos.length() < nucleusRadius);
+  // Measurement simulation logic
+  useEffect(() => {
+    if (viewMode !== 'measurement') return;
 
-            return { position: pos, trajectory: null };
-        } else if (mode === 'trajectory') {
-            let start: THREE.Vector3, end: THREE.Vector3, intersects = true;
-
-            while (intersects) {
-                // eslint-disable-next-line react-hooks/purity
-                start = new THREE.Vector3().randomDirection().multiplyScalar(Math.random() * CLOUD_RADIUS);
-                // eslint-disable-next-line react-hooks/purity
-                end = new THREE.Vector3().randomDirection().multiplyScalar(Math.random() * CLOUD_RADIUS);
-
-                const line = new THREE.Line3(start, end);
-                const closestPoint = new THREE.Vector3();
-                line.closestPointToPoint(new THREE.Vector3(0, 0, 0), true, closestPoint);
-
-                if (closestPoint.length() >= nucleusRadius) {
-                    intersects = false;
-                }
-            }
-
-            return { position: null, trajectory: [start!, end!] as [THREE.Vector3, THREE.Vector3] };
+    const interval = setInterval(() => {
+      setMeasuredPoints(prev => {
+        // Add 25 random points from the probability distribution every tick
+        const newPoints = generateOrbitalPoints(n, l, m, 25);
+        const next = new Float32Array(prev.length + newPoints.length * 3);
+        next.set(prev);
+        for (let i = 0; i < newPoints.length; i++) {
+          const offset = prev.length + i * 3;
+          next[offset] = newPoints[i].x;
+          next[offset + 1] = newPoints[i].y;
+          next[offset + 2] = newPoints[i].z;
         }
-        return { position: null, trajectory: null };
-    }, [mode, actionId, protons, neutrons]);
+        return next;
+      });
+    }, 100);
 
-    return (
-        <>
-            <ambientLight intensity={0.8} />
-            <pointLight position={[20, 20, 20]} intensity={1.5} />
-            <pointLight position={[-20, -20, -20]} intensity={1} />
-            <OrbitControls enablePan={true} enableZoom={true} enableRotate={true} />
+    return () => clearInterval(interval);
+  }, [viewMode, n, l, m]);
 
-            <group>
-                <Nucleus protons={protons} neutrons={neutrons} />
-                <ProbabilityCloud />
-                {position && <Particle position={position.toArray() as [number, number, number]} color={COLORS.electron} size={0.3} material={schrodingerElectronMaterial} />}
-                {trajectory && <TrajectoryArrow start={trajectory[0]} end={trajectory[1]} />}
-            </group>
-        </>
-    );
+  // Auto-reset measurements every 10 seconds to keep simulation dynamic
+  useEffect(() => {
+    if (viewMode !== 'measurement') return;
+
+    const resetInterval = setInterval(() => {
+      setMeasuredPoints(new Float32Array(0));
+    }, 10000);
+
+    return () => clearInterval(resetInterval);
+  }, [viewMode]);
+
+  // Wave Animation
+  useFrame((state) => {
+    if (!pointsRef.current) return;
+    
+    if (viewMode === 'wave') {
+      const time = state.clock.getElapsedTime();
+      const s = 1 + Math.sin(time * 3) * 0.05;
+      pointsRef.current.scale.set(s, s, s);
+      // @ts-ignore
+      pointsRef.current.material.opacity = 0.4 + Math.sin(time * 3) * 0.2;
+    } else {
+      pointsRef.current.scale.set(1, 1, 1);
+      if (viewMode === 'measurement') {
+        // @ts-ignore
+        pointsRef.current.material.opacity = 0.8;
+      } else {
+        // @ts-ignore
+        pointsRef.current.material.opacity = 0.6;
+      }
+    }
+  });
+
+  const subshells = ['s', 'p', 'd', 'f'];
+  const orbitalName = `${n}${subshells[l] || ''}`;
+
+  return (
+    <>
+      <ambientLight intensity={0.5} />
+      <pointLight position={[10, 10, 10]} intensity={1} />
+      <OrbitControls enablePan={true} enableZoom={true} enableRotate={true} />
+
+      <group>
+        <Nucleus protons={protons} neutrons={neutrons} />
+
+        {/* The Cloud / Wave */}
+        {(viewMode === 'cloud' || viewMode === 'wave') && (
+          <points ref={pointsRef}>
+            <bufferGeometry>
+              <bufferAttribute
+                attach="attributes-position"
+                count={cloudPoints.length / 3}
+                array={cloudPoints}
+                itemSize={3}
+              />
+            </bufferGeometry>
+            <pointsMaterial
+              size={0.15}
+              color={COLORS.electron}
+              transparent
+              opacity={0.6}
+              // @ts-ignore
+              blending={THREE.AdditiveBlending}
+              // @ts-ignore
+              depthWrite={false}
+            />
+          </points>
+        )}
+
+        {/* Measured Points (The "Particle" view) */}
+        {viewMode === 'measurement' && (
+          <group>
+            {/* Background "Ghost" cloud to show where it *could* be */}
+            <points>
+              <bufferGeometry>
+                <bufferAttribute
+                  attach="attributes-position"
+                  count={cloudPoints.length / 3}
+                  array={cloudPoints}
+                  itemSize={3}
+                />
+              </bufferGeometry>
+              <pointsMaterial
+                size={0.12}
+                color={COLORS.electron}
+                transparent
+                opacity={0.15}
+                depthWrite={false}
+              />
+            </points>
+
+            {/* Actual detected points */}
+            {measuredPoints.length > 0 && (
+              <points>
+                <bufferGeometry>
+                  <bufferAttribute
+                    attach="attributes-position"
+                    count={measuredPoints.length / 3}
+                    array={measuredPoints}
+                    itemSize={3}
+                  />
+                </bufferGeometry>
+                <pointsMaterial
+                  size={0.35}
+                  color="#fff" // Brighter white for "detection"
+                  transparent
+                  opacity={0.9}
+                  // @ts-ignore
+                  blending={THREE.AdditiveBlending}
+                />
+              </points>
+            )}
+          </group>
+        )}
+
+        {/* 3D Label */}
+        <Html position={[0, -n * 2 - 2, 0]} center>
+          <div className="bg-gray-900/80 backdrop-blur text-white px-3 py-1 rounded border border-indigo-500/50 text-sm font-mono whitespace-nowrap select-none pointer-events-none">
+            Orbital {orbitalName} (n={n}, l={l}, m={m})
+          </div>
+        </Html>
+      </group>
+    </>
+  );
 };

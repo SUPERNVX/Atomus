@@ -139,8 +139,29 @@ const App: React.FC = () => {
     ? atomState.protons
     : atomState.electrons.reduce((acc, curr) => acc + curr, 0);
 
-  const [schrodingerMode, setSchrodingerMode] = useState<'position' | 'trajectory' | 'none'>('none');
-  const [schrodingerActionId, setSchrodingerActionId] = useState(0);
+  // Schrödinger Model State
+  const [quantumState, setQuantumState] = useState({ n: 2, l: 1, m: 0 });
+  const [schrodingerViewMode, setSchrodingerViewMode] = useState<'cloud' | 'measurement' | 'wave'>('cloud');
+
+  const handleQuantumChange = (key: 'n' | 'l' | 'm', value: number) => {
+    setQuantumState(prev => {
+      const newState = { ...prev, [key]: value };
+      
+      // Validation Logic
+      // Ensure l < n
+      if (key === 'n' && newState.l >= newState.n) {
+        newState.l = newState.n - 1;
+      }
+      // Ensure |m| <= l
+      if (key === 'l' || key === 'n') {
+        if (Math.abs(newState.m) > newState.l) {
+          newState.m = 0; // Reset m if l changes drastically
+        }
+      }
+      
+      return newState;
+    });
+  };
 
   return (
     <main className="relative h-screen w-screen text-gray-200 flex flex-col overflow-hidden">
@@ -155,7 +176,7 @@ const App: React.FC = () => {
         </div>
 
         <div className="absolute top-4 right-4 pointer-events-auto flex flex-col items-end space-y-2">
-          {(currentModel === 'bohr' || currentModel === 'sommerfeld' || currentModel === 'rutherford') && (
+          {(currentModel === 'bohr' || currentModel === 'sommerfeld' || currentModel === 'rutherford' || currentModel === 'schrodinger') && (
             <InfoPanel
               protons={atomState.protons}
               neutrons={atomState.neutrons}
@@ -198,7 +219,7 @@ const App: React.FC = () => {
           >
             <color attach="background" args={['#111828']} />
 
-            <CameraRig active={tourActive} />
+            <CameraRig active={tourActive} currentModel={currentModel} />
 
             <group visible={currentModel === 'bohr'}>
               <AtomModel
@@ -208,9 +229,21 @@ const App: React.FC = () => {
                 onParticleClick={setSelectedParticle}
               />
             </group>
-            <group visible={currentModel === 'schrodinger'}>
-              <SchrodingerModel protons={atomState.protons} neutrons={atomState.neutrons} mode={schrodingerMode} actionId={schrodingerActionId} />
-            </group>
+            
+            {/* Conditional rendering to ensure HTML labels are unmounted when not active */}
+            {currentModel === 'schrodinger' && (
+              <SchrodingerModel 
+                protons={atomState.protons} 
+                neutrons={atomState.neutrons} 
+                n={quantumState.n}
+                l={quantumState.l}
+                m={quantumState.m}
+                viewMode={schrodingerViewMode}
+                // Force remount if quantum numbers change deeply
+                key={`schrodinger-${quantumState.n}-${quantumState.l}-${quantumState.m}`}
+              />
+            )}
+
             {currentModel === 'entanglement' && <QuantumEntanglementModel />}
             <group visible={currentModel === 'sommerfeld'}>
               <SommerfeldModel protons={atomState.protons} neutrons={atomState.neutrons} electrons={atomState.electrons} orbitThickness={orbitThickness} />
@@ -291,11 +324,22 @@ const App: React.FC = () => {
         </footer>
       )}
 
+      {/* Schrödinger Model Controls (NEW) */}
       {currentModel === 'schrodinger' && (
         <footer className="absolute bottom-0 left-0 w-full p-4 bg-gray-900/50 backdrop-blur-sm z-10">
-          <div className="max-w-md mx-auto p-2 rounded-lg bg-gray-800/70 flex space-x-2">
-            <button onClick={() => { setSchrodingerMode('position'); setSchrodingerActionId(p => p + 1); }} className="w-full bg-indigo-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-600 transition-colors duration-200">{t('define_position')}</button>
-            <button onClick={() => { setSchrodingerMode('trajectory'); setSchrodingerActionId(p => p + 1); }} className="w-full bg-purple-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-purple-600 transition-colors duration-200">{t('define_trajectory')}</button>
+          <div className="max-w-7xl mx-auto">
+            <Controls
+              atomState={atomState}
+              shellConfig={SHELL_CONFIG}
+              onProtonChange={handleProtonChange}
+              onNeutronChange={handleNeutronChange}
+              showShellControls={false} // Hide traditional shells
+              // Quantum Props
+              quantumSettings={quantumState}
+              onQuantumChange={handleQuantumChange}
+              schrodingerViewMode={schrodingerViewMode}
+              onSchrodingerViewModeChange={setSchrodingerViewMode}
+            />
           </div>
         </footer>
       )}

@@ -199,5 +199,11 @@
   "moscovium": "Moscovium",
   "livermorium": "Livermorium",
   "tennessine": "Tennessine",
-  "oganesson": "Oganesson"
+  "oganesson": "Oganesson",
+  "schrodinger_mode_cloud": "Cloud Mode",
+  "schrodinger_mode_measurement": "Measurement Mode",
+  "schrodinger_mode_wave": "Wave Mode",
+  "quantum_n_label": "N (Energy Level)",
+  "quantum_l_label": "L (Subshell)",
+  "quantum_m_label": "M (Orientation)"
 }

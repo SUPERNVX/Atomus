@@ -199,5 +199,13 @@
   "moscovium": "Moscovio",
   "livermorium": "Livermorio",
   "tennessine": "Tenesino",
-  "oganesson": "Oganesón"
+  "oganesson": "Oganesón",
+  "stop_tour": "⏹ Detener Tour"
+},
+  "schrodinger_mode_cloud": "Modo Nube",
+  "schrodinger_mode_measurement": "Modo Medición",
+  "schrodinger_mode_wave": "Modo Onda",
+  "quantum_n_label": "N (Nivel de Energía)",
+  "quantum_l_label": "L (Subcapa)",
+  "quantum_m_label": "M (Orientación)"
 }

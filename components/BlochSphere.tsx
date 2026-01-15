@@ -38,7 +38,7 @@ export const BlochSphere: React.FC<BlochSphereProps> = ({
 
       {/* Axes */}
       <Line points={[[0, -3, 0], [0, 3, 0]]} color="#475569" lineWidth={1} transparent opacity={0.5} />
-      <Line points={[-3, 0, 0], [3, 0, 0]} color="#475569" lineWidth={1} transparent opacity={0.5} />
+      <Line points={[[-3, 0, 0], [3, 0, 0]]} color="#475569" lineWidth={1} transparent opacity={0.5} />
       <Line points={[[0, 0, -3], [0, 0, 3]]} color="#475569" lineWidth={1} transparent opacity={0.5} />
 
       {/* Labels */}

@@ -15,6 +15,11 @@ interface ControlsProps {
   onSimulateExcitation?: () => void;
   showEffects?: boolean;
   onToggleEffects?: () => void;
+  // Quantum Controls
+  quantumSettings?: { n: number; l: number; m: number };
+  onQuantumChange?: (key: 'n' | 'l' | 'm', value: number) => void;
+  schrodingerViewMode?: 'cloud' | 'measurement' | 'wave';
+  onSchrodingerViewModeChange?: (mode: 'cloud' | 'measurement' | 'wave') => void;
 }
 
 const EditableValue: React.FC<{
@@ -141,12 +146,34 @@ export const Controls: React.FC<ControlsProps> = ({
   showExcitationButton = false,
   onSimulateExcitation,
   showEffects,
-  onToggleEffects
+  onToggleEffects,
+  quantumSettings,
+  onQuantumChange,
+  schrodingerViewMode,
+  onSchrodingerViewModeChange
 }) => {
   const { t } = useTranslation();
   return (
     <div className="space-y-4 p-2 rounded-lg bg-gray-800/70">
       <div className="flex space-x-2">
+        {schrodingerViewMode && onSchrodingerViewModeChange && (
+          <div className="flex-1 flex bg-gray-900/50 p-1 rounded-xl border border-gray-700/50">
+            {(['cloud', 'measurement', 'wave'] as const).map((mode) => (
+              <button
+                key={mode}
+                onClick={() => onSchrodingerViewModeChange(mode)}
+                className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all duration-200 ${
+                  schrodingerViewMode === mode 
+                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' 
+                  : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800'
+                }`}
+              >
+                {t(`schrodinger_mode_${mode}`)}
+              </button>
+            ))}
+          </div>
+        )}
+
         {showExcitationButton && (
           <div className="flex-1 p-2">
             <button
@@ -224,6 +251,61 @@ export const Controls: React.FC<ControlsProps> = ({
               max={8}
               onValueChange={onOrbitThicknessChange}
               colorClass="indigo"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Quantum Controls */}
+      {quantumSettings && onQuantumChange && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 p-4 rounded-lg bg-gray-900/50 border border-indigo-500/20">
+          {/* N Level */}
+          <div className="flex flex-col space-y-2">
+            <div className="flex justify-between items-center text-sm">
+              <label className="font-medium text-indigo-300">{t('quantum_n_label')}</label>
+              <span className="px-2 py-1 bg-gray-700 rounded text-xs font-mono">{quantumSettings.n}</span>
+            </div>
+            <input
+              type="range"
+              min="1"
+              max="4"
+              value={quantumSettings.n}
+              onChange={(e) => onQuantumChange('n', parseInt(e.target.value))}
+              className="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+            />
+          </div>
+
+          {/* L Sublevel */}
+          <div className="flex flex-col space-y-2">
+            <div className="flex justify-between items-center text-sm">
+              <label className="font-medium text-pink-300">{t('quantum_l_label')}</label>
+              <span className="px-2 py-1 bg-gray-700 rounded text-xs font-mono">
+                {quantumSettings.l} ({['s', 'p', 'd', 'f'][quantumSettings.l] || '?'})
+              </span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max={quantumSettings.n - 1}
+              value={quantumSettings.l}
+              onChange={(e) => onQuantumChange('l', parseInt(e.target.value))}
+              className="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-pink-500"
+            />
+          </div>
+
+          {/* M Magnetic */}
+          <div className="flex flex-col space-y-2">
+            <div className="flex justify-between items-center text-sm">
+              <label className="font-medium text-cyan-300">{t('quantum_m_label')}</label>
+              <span className="px-2 py-1 bg-gray-700 rounded text-xs font-mono">{quantumSettings.m}</span>
+            </div>
+            <input
+              type="range"
+              min={-quantumSettings.l}
+              max={quantumSettings.l}
+              value={quantumSettings.m}
+              onChange={(e) => onQuantumChange('m', parseInt(e.target.value))}
+              className="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-cyan-500"
             />
           </div>
         </div>

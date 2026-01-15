@@ -199,5 +199,11 @@
   "moscovium": "Московий",
   "livermorium": "Ливерморий",
   "tennessine": "Теннессин",
-  "oganesson": "Оганесон"
+  "stop_tour": "⏹ Остановить тур",
+  "schrodinger_mode_cloud": "Режим облака",
+  "schrodinger_mode_measurement": "Режим измерения",
+  "schrodinger_mode_wave": "Волновой режим",
+  "quantum_n_label": "N (Уровень энергии)",
+  "quantum_l_label": "L (Подоболочка)",
+  "quantum_m_label": "M (Ориентация)"
 }
